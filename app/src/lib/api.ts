@@ -124,11 +124,12 @@ export function normalizePhone(input: string): string | null {
 const phoneToEmail = (digits: string) => `237${digits}@${CONFIG.phoneEmailDomain}`;
 
 export async function signUp(p: { phone: string; password: string; displayName: string; role: Role }) {
-  const d = await http<AuthResponse>('/auth/v1/signup', {
-    method: 'POST', auth: false,
-    body: { email: phoneToEmail(p.phone), password: p.password, data: { display_name: p.displayName, role: p.role } },
+  // Le compte est créé côté serveur, déjà activé (aucun e-mail envoyé), puis on se connecte.
+  await http<{ ok: boolean }>('/functions/v1/phone-signup', {
+    method: 'POST', auth: false, timeoutMs: 25000,
+    body: { phone: p.phone, password: p.password, display_name: p.displayName, role: p.role },
   });
-  storeAuth(d);
+  await signIn({ phone: p.phone, password: p.password });
 }
 
 export async function signIn(p: { phone: string; password: string }) {

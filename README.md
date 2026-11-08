@@ -21,7 +21,9 @@ Une seule base de code sert l'application web installable (pilote), et plus tard
 
 ## Mise en ligne : deux réglages à faire une fois
 
-### 1. Supabase : désactiver la confirmation par e-mail (obligatoire)
+### 1. Supabase : confirmation par e-mail (plus obligatoire)
+
+Depuis la fonction `phone-signup`, les comptes sont créés déjà activés et aucun e-mail n’est envoyé, quel que soit ce réglage. Le désactiver reste conseillé pour la cohérence.
 
 Les comptes utilisent le numéro de téléphone et un mot de passe. Supabase exige un e-mail : l'application en fabrique un à partir du numéro (`237XXXXXXXXX@telephone.bouchnocam.example`). Aucun e-mail ne doit donc être envoyé.
 

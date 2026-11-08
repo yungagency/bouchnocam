@@ -36,6 +36,8 @@ const calls = [];
     calls.push(`${req.method()} ${p} ${body ? JSON.stringify(body).slice(0, 110) : ''}`);
     const json = (d, s = 200) => route.fulfill({ status: s, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(d) });
     if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' } });
+    if (p === '/functions/v1/phone-signup') { me = { id: 'u1', display_name: body.display_name, role: body.role, points: 0, is_admin: false, rank: 4, reports_count: 0, confirmed_count: 0 }; return json({ ok: true }); }
+    if (p === '/auth/v1/token') return json({ access_token: 'tok', refresh_token: 'ref', expires_in: 3600, user: { id: 'u1' } });
     if (p === '/auth/v1/signup') { me = { id: 'u1', display_name: body.data.display_name, role: body.data.role, points: 0, is_admin: false, rank: 4, reports_count: 0, confirmed_count: 0 }; return json({ access_token: 'tok', refresh_token: 'ref', expires_in: 3600, user: { id: 'u1' } }); }
     if (p === '/rest/v1/reports') return json(reports);
     if (p === '/rest/v1/rpc/me') return json(me);
