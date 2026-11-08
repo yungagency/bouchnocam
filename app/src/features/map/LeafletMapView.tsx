@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { CONFIG } from '../../lib/config';
-import { isConfirmed, reportColor, reportLabel } from '../../lib/format';
+import { TRAFFIC_STATES, isConfirmed, reportColor, reportLabel } from '../../lib/format';
 import {
   getState, loadReports, markUserMovedMap, openOverlay, registerMap, useApp,
 } from '../../lib/store';
@@ -34,6 +34,8 @@ export function LeafletMapView() {
   const reports = useApp((s) => s.reports);
   const pos = useApp((s) => s.pos);
   const emergency = useApp((s) => s.emergency);
+  const cells = useApp((s) => s.trafficCells);
+  const cellLayer = useRef<L.LayerGroup | null>(null);
 
   // Création de la carte
   useEffect(() => {
@@ -45,6 +47,7 @@ export function LeafletMapView() {
     }).addTo(map);
     map.attributionControl.setPrefix(false);
     layerRef.current = L.layerGroup().addTo(map);
+    cellLayer.current = L.layerGroup().addTo(map);
     routeLayer.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     map.on('dragstart', markUserMovedMap);
@@ -114,6 +117,17 @@ export function LeafletMapView() {
       user.current.acc.setLatLng(ll).setRadius(pos.acc);
     }
   }, [pos]);
+
+  // Trafic calculé par Bouchnocam (Mode conduite)
+  useEffect(() => {
+    const layer = cellLayer.current;
+    if (!layer) return;
+    layer.clearLayers();
+    for (const c of cells) {
+      const color = TRAFFIC_STATES[c.state].color;
+      L.circle([c.lat, c.lng], { radius: 75, stroke: false, fillColor: color, fillOpacity: 0.55, interactive: false }).addTo(layer);
+    }
+  }, [cells]);
 
   // Itinéraire d'urgence
   useEffect(() => {

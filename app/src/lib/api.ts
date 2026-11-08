@@ -1,6 +1,6 @@
 // Client Supabase minimal (Auth + PostgREST + Edge Functions), sans dépendance externe.
 import { CONFIG } from './config';
-import type { EmergencyResult, Hospital, Leader, Me, MyReport, Report, ReportType, Role, Severity } from './types';
+import type { TrafficCell, EmergencyResult, Hospital, Leader, Me, MyReport, Report, ReportType, Role, Severity } from './types';
 
 const SESSION_KEY = 'bcm.session';
 
@@ -192,3 +192,12 @@ export const fetchHospitals = () =>
 
 export const emergencyRoute = (p: { lat: number; lng: number }) =>
   http<EmergencyResult>('/functions/v1/emergency-route', { method: 'POST', body: p, auth: false, timeoutMs: 30000 });
+
+export const ingestProbes = (session: string, role: Role, points: unknown[]) =>
+  http<number>('/rest/v1/rpc/ingest_probes', { method: 'POST', body: { p_session: session, p_role: role, p_points: points } });
+
+export const fetchTraffic = (b: { south: number; west: number; north: number; east: number }) =>
+  http<TrafficCell[]>('/rest/v1/rpc/traffic_now', {
+    method: 'POST', auth: false,
+    body: { p_south: b.south, p_west: b.west, p_north: b.north, p_east: b.east, p_min_vehicles: 3 },
+  });

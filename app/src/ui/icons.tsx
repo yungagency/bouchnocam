@@ -23,6 +23,7 @@ export const IconInstall = (p: P) => <Stroke {...p} d="M12 3v12M7 10l5 5 5-5M5 2
 export const IconRefresh = (p: P) => <Stroke {...p} d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" />;
 export const IconShield = (p: P) => <Stroke {...p} d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6z" />;
 export const IconLayers = (p: P) => <Stroke {...p} d="M12 3 2 8l10 5 10-5-10-5zM2 13l10 5 10-5M2 17.5l10 5 10-5" />;
+export const IconSteering = (p: P) => <Stroke {...p} d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM3.4 10.5c3 .6 5.5.6 6.3-1M20.6 10.5c-3 .6-5.5.6-6.3-1M12 14.5V21" />;
 export const IconAlert = (p: P) => <Stroke {...p} d="M12 3 2 20h20L12 3zM12 10v4M12 17h.01" />;
 
 export const IconStar = ({ size }: P) => (
@@ -64,6 +65,7 @@ export const GLYPH_SVG: Record<ReportType, string> = {
   route_barree: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor"/><rect x="6.5" y="10.4" width="11" height="3.2" rx="1.2" style="fill:var(--c)"/></svg>',
   travaux: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.5h3.4l4.6 14.5H5.7z" fill="currentColor"/><path d="M8.8 9h6.4M7.4 13.5h9.2" style="stroke:var(--c)" stroke-width="2"/><rect x="3.5" y="18" width="17" height="2.6" rx="1.2" fill="currentColor"/></svg>',
   inondation: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8s-5.6 6.1-5.6 10a5.6 5.6 0 0 0 11.2 0c0-3.9-5.6-10-5.6-10z" fill="currentColor"/><path d="M9.4 13.6a2.8 2.8 0 0 0 2.6 2.4" style="stroke:var(--c)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>',
+  route_impraticable: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.2 3h7.6l4.4 18H3.8z" fill="currentColor"/><path d="M12 5v2.4M12 9.4v1.6" style="stroke:var(--c)" stroke-width="1.7" stroke-linecap="round"/><ellipse cx="12" cy="16" rx="4.6" ry="2.3" style="fill:var(--c)"/><path d="M8.6 15.4l1.6.9M15.4 15.4l-1.6.9" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>',
 };
 export const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 export const HOSPITAL_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor"/><path d="M12 7.5v9M7.5 12h9" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/></svg>';
@@ -75,6 +77,7 @@ export const GLYPH: Record<ReportType, ReactNode> = {
   route_barree: <Glyph type="route_barree" />,
   travaux: <Glyph type="travaux" />,
   inondation: <Glyph type="inondation" />,
+  route_impraticable: <Glyph type="route_impraticable" />,
 };
 
 // Illustration des cartes Léger / Moyen / Bloqué, comme sur la maquette : 1, 3 ou 4 voitures

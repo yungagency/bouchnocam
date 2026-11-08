@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { CONFIG } from './lib/config';
 import { SEVERITY, TYPES } from './lib/format';
 import {
-  centerOnUser, getState, loadReports, map, markUserMovedMap, openOverlay, pruneExpired, refreshUser,
+  centerOnUser, closeOverlay, getState, loadReports, map, markUserMovedMap, openOverlay, pruneExpired, refreshUser,
   setState, setTab, startEmergency, startGeo, toast, toggleTraffic, undoReport, useApp,
 } from './lib/store';
 import type { Tab } from './lib/types';
@@ -13,10 +13,14 @@ import { EmergencyScreen } from './features/emergency/EmergencyScreen';
 import { NearbyView } from './features/nearby/NearbyView';
 import { AccountSheet, InstallSheet, OnboardingSheet, ProfileView } from './features/profile/ProfileView';
 import { ConnectionPill, LogoMark, Splash } from './ui/Logo';
+import { Sheet } from './ui/Sheet';
+import { giveDriveConsent, requestDrive, startDrive, stopDrive } from './lib/drive';
 import { AuthSheet, EditProfileSheet, PrivacySheet } from './features/auth/AuthSheet';
 import {
-  GLYPH, IconAmbulance, IconClose, IconLayers, IconLocate, IconMap, IconMegaphone, IconNearby, IconProfile, IconSearch, IconStar,
+  GLYPH, IconAmbulance, IconSteering, IconClose, IconLayers, IconLocate, IconMap, IconMegaphone, IconNearby, IconProfile, IconSearch, IconStar,
 } from './ui/icons';
+
+const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('') || '?';
 
 // ------------------------------------------------------------------ Barre du haut : recherche + avatar
 interface Place { display_name: string; lat: string; lon: string }
@@ -74,7 +78,7 @@ function TopBar() {
       </form>
       <button type="button" className="avatar-btn" onClick={() => (signedIn ? setTab('profile') : openOverlay({ kind: 'auth', mode: 'login' }))}
         aria-label={signedIn ? 'Mon profil' : 'Se connecter'}>
-        <span className="avatar">{signedIn && me ? me.display_name.slice(0, 1).toUpperCase() : <IconProfile size={24} />}</span>
+        <span className="avatar">{signedIn && me ? initials(me.display_name) : <IconProfile size={24} />}</span>
         {signedIn && me && <span className="avatar-btn__pts"><IconStar size={12} />{me.points}</span>}
       </button>
     </header>
@@ -108,6 +112,7 @@ function Legend() {
   const provider = useApp((s) => s.mapProvider);
   const traffic = useApp((s) => s.traffic);
   const live = provider === 'google' && traffic;
+  const own = useApp((s) => s.trafficCells.length > 0);
   if (!open) {
     return <button type="button" className="legend-toggle" onClick={() => setOpen(true)} aria-label="Afficher la légende"><IconLayers size={22} /></button>;
   }
@@ -124,12 +129,67 @@ function Legend() {
           <span key={s} className="legend__row"><i style={{ background: SEVERITY[s].color }} />{SEVERITY[s].label}</span>
         ))
       )}
+      {own && <span className="legend__own"><i />Trafic Bouchnocam (bêta)</span>}
       <span className="legend__icons">
-        {(['accident', 'route_barree', 'travaux', 'inondation'] as const).map((t) => (
+        {(['accident', 'route_barree', 'travaux', 'inondation', 'route_impraticable'] as const).map((t) => (
           <span key={t} className="legend__glyph" style={{ ['--c' as string]: TYPES[t].color }} title={TYPES[t].label}>{GLYPH[t]}</span>
         ))}
       </span>
     </div>
+  );
+}
+
+function DriveChip() {
+  const active = useApp((s) => s.drive.active);
+  if (active) return null;
+  return (
+    <button type="button" className="map-chip map-chip--drive" onClick={requestDrive}>
+      <IconSteering size={20} />Je roule
+    </button>
+  );
+}
+
+function DriveBanner() {
+  const drive = useApp((s) => s.drive);
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (!drive.active) return undefined;
+    const t = setInterval(() => tick((x) => x + 1), 15000);
+    return () => clearInterval(t);
+  }, [drive.active]);
+  if (!drive.active) return null;
+  const min = Math.max(0, Math.round((Date.now() - drive.startedAt) / 60000));
+  return (
+    <div className="drive-banner" role="status">
+      <span className="drive-banner__dot" />
+      <div className="drive-banner__text">
+        <strong>Mode conduite actif</strong>
+        <span>{min} min · {drive.sent} positions partagées{drive.wakeLock ? ' · écran maintenu allumé' : ''}</span>
+      </div>
+      <button type="button" className="drive-banner__stop" onClick={() => stopDrive()}>Arrêter</button>
+    </div>
+  );
+}
+
+function DriveSheet() {
+  return (
+    <Sheet label="Mode conduite">
+      <div className="auth-head">
+        <span className="drive-hero"><IconSteering size={40} /></span>
+        <h2 className="sheet__title">Mode conduite</h2>
+        <p className="muted">Pendant vos trajets, votre téléphone aide Bouchnocam à calculer le trafic en temps réel.</p>
+      </div>
+      <ul className="drive-list">
+        <li><b>Ce qui est partagé</b><span>Position, vitesse, direction et heure, toutes les 4 secondes.</span></li>
+        <li><b>Anonyme</b><span>Sans votre nom ni votre numéro. L'identifiant change à chaque trajet, le début et la fin de vos trajets sont ignorés, et les positions sont effacées après 48 h.</span></li>
+        <li><b>Écran allumé</b><span>L'écran reste allumé pendant le trajet : branchez le téléphone si possible. Moins de 1 Mo de données par heure.</span></li>
+        <li><b>Sécurité</b><span>Posez le téléphone sur un support avant de démarrer. Ne le manipulez pas en conduisant.</span></li>
+      </ul>
+      <div className="stack">
+        <button type="button" className="btn btn--primary btn--block btn--lg" onClick={() => { giveDriveConsent(); closeOverlay(); startDrive(); }}>Activer le Mode conduite</button>
+        <button type="button" className="btn btn--ghost btn--block" onClick={() => closeOverlay()}>Pas maintenant</button>
+      </div>
+    </Sheet>
   );
 }
 
@@ -163,7 +223,7 @@ function UndoBar() {
   return (
     <div className="undo" role="status">
       <span className="undo__check">✓</span>
-      <span className="undo__text"><strong>Merci !</strong>{undo.label} signalé · +10 points dès 2 confirmations</span>
+      <span className="undo__text"><strong>Merci !</strong>{undo.label} · +10 points dès 2 confirmations</span>
       <button type="button" className="undo__btn" onClick={undoReport}>Annuler <small>{left}</small></button>
       <span className="undo__timer" style={{ animationDuration: `${CONFIG.undoSeconds}s` }} />
     </div>
@@ -238,11 +298,13 @@ export function App() {
               <button type="button" className="map-btn" aria-label="Me localiser" onClick={() => { startGeo(true); if (geoGranted) centerOnUser(); }}>
                 <IconLocate size={24} />
               </button>
+              <DriveChip />
               <TrafficToggle />
               <Legend />
             </div>
           </>
         )}
+        {!emergencyOpen && <DriveBanner />}
         {!emergencyOpen && <ConnectionPill offline={offline} onRetry={() => { loadReports(); }} />}
         {tab === 'nearby' && <NearbyView />}
         {tab === 'profile' && <ProfileView />}
@@ -267,6 +329,7 @@ export function App() {
       {overlay?.kind === 'privacy' && <PrivacySheet />}
       {overlay?.kind === 'edit' && <EditProfileSheet />}
       {overlay?.kind === 'account' && <AccountSheet />}
+      {overlay?.kind === 'drive' && <DriveSheet />}
       {overlay?.kind === 'install' && <InstallSheet />}
       {overlay?.kind === 'onboarding' && <OnboardingSheet />}
       <Toast />

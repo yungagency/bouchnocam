@@ -60,7 +60,7 @@ const penalty = (i: Incident) =>
 
 // Incidents qui ralentissent ou bloquent un véhicule
 const blocking = (i: Incident) =>
-  ['accident', 'route_barree', 'inondation'].includes(i.type) || (i.type === 'embouteillage' && (i.severity ?? 0) >= 2);
+  ['accident', 'route_barree', 'inondation', 'route_impraticable'].includes(i.type) || (i.type === 'embouteillage' && (i.severity ?? 0) >= 2);
 
 let cachedKey: string | null = null;
 

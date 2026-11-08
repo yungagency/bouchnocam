@@ -24,7 +24,7 @@ async function placeName(lat: number, lng: number): Promise<string | null> {
   }
 }
 
-const OTHERS: ReportType[] = ['accident', 'route_barree', 'travaux', 'inondation'];
+const OTHERS: ReportType[] = ['accident', 'route_barree', 'route_impraticable', 'travaux', 'inondation'];
 const MEGAPHONE: Record<Severity, string> = { 1: '#F28C28', 2: '#1E8A45', 3: '#D62828' };
 
 type Choice = { type: ReportType; severity: Severity | null } | null;

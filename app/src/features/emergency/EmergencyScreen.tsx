@@ -51,7 +51,7 @@ export function EmergencyScreen() {
         <div className="emergency__body">
           {(em.status === 'locating' || em.status === 'loading') && (
             <div className="em-loading">
-              <LogoMark className="is-searching" size={56} />
+              <LogoMark size={56} />
               <strong>{em.status === 'locating' ? 'Recherche de votre position…' : "Calcul de l'itinéraire le plus rapide…"}</strong>
             </div>
           )}

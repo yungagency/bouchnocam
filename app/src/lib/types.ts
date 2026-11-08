@@ -1,4 +1,4 @@
-export type ReportType = 'embouteillage' | 'accident' | 'route_barree' | 'travaux' | 'inondation';
+export type ReportType = 'embouteillage' | 'accident' | 'route_barree' | 'travaux' | 'inondation' | 'route_impraticable';
 export type Severity = 1 | 2 | 3;
 export type Role = 'usager' | 'taximan' | 'moto';
 
@@ -81,7 +81,18 @@ export type Overlay =
   | { kind: 'privacy' }
   | { kind: 'edit' }
   | { kind: 'account' }
+  | { kind: 'drive' }
   | { kind: 'install' }
   | { kind: 'onboarding' };
 
 export type Tab = 'map' | 'nearby' | 'profile';
+
+export interface TrafficCell {
+  lat: number;
+  lng: number;
+  heading_bucket: number;
+  vehicles: number;
+  speed: number;
+  state: 'fluide' | 'modere' | 'dense' | 'bouchon';
+  updated_at: string;
+}

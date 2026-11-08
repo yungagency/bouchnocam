@@ -3,7 +3,7 @@
 // et les signalements Bouchnocam par-dessus. Si Google ne se charge pas, on repasse sur Leaflet.
 import { useEffect, useRef, useState } from 'react';
 import { CONFIG } from '../../lib/config';
-import { isConfirmed, reportColor, reportLabel } from '../../lib/format';
+import { TRAFFIC_STATES, isConfirmed, reportColor, reportLabel } from '../../lib/format';
 import { getState, loadReports, markUserMovedMap, openOverlay, registerMap, useApp } from '../../lib/store';
 import type { Report } from '../../lib/types';
 import { CHECK_SVG, GLYPH_SVG, HOSPITAL_SVG } from '../../ui/icons';
@@ -79,6 +79,8 @@ export function GoogleMapView({ apiKey, onFail }: { apiKey: string; onFail: () =
   const pos = useApp((s) => s.pos);
   const emergency = useApp((s) => s.emergency);
   const traffic = useApp((s) => s.traffic);
+  const cells = useApp((s) => s.trafficCells);
+  const cellObjs = useRef<google.maps.Circle[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -139,6 +141,7 @@ export function GoogleMapView({ apiKey, onFail }: { apiKey: string; onFail: () =
       user.current?.acc.setMap(null);
       user.current = null;
       routeObjs.current.forEach((o) => o.setMap(null));
+      cellObjs.current.forEach((c) => c.setMap(null));
       trafficRef.current?.setMap(null);
       mapRef.current = null;
     };
@@ -190,6 +193,20 @@ export function GoogleMapView({ apiKey, onFail }: { apiKey: string; onFail: () =
       user.current.acc.setRadius(pos.acc);
     }
   }, [pos, ready]);
+
+  // Trafic calculé par Bouchnocam (Mode conduite)
+  useEffect(() => {
+    const map = mapRef.current;
+    cellObjs.current.forEach((c) => c.setMap(null));
+    cellObjs.current = [];
+    if (!map) return;
+    for (const c of cells) {
+      cellObjs.current.push(new google.maps.Circle({
+        map, center: { lat: c.lat, lng: c.lng }, radius: 75, strokeWeight: 0,
+        fillColor: TRAFFIC_STATES[c.state].color, fillOpacity: 0.5, clickable: false, zIndex: 2,
+      }));
+    }
+  }, [cells, ready]);
 
   // Itinéraire d'urgence
   useEffect(() => {

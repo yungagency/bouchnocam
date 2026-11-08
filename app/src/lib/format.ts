@@ -7,6 +7,26 @@ export const TYPES: Record<ReportType, { label: string; short: string; color: st
   route_barree: { label: 'Route barrée', short: 'Route barrée', color: '#263F73' },
   travaux: { label: 'Travaux', short: 'Travaux', color: '#8A5A00' },
   inondation: { label: 'Inondation', short: 'Inondation', color: '#0A6FB0' },
+  route_impraticable: { label: 'Route impraticable', short: 'Impraticable', color: '#5D4037' },
+};
+
+// Phrase de confirmation, accordée au type (« Route barrée signalée », « Travaux signalés »…)
+export const reportedPhrase = (type: ReportType, severity: Severity | null) => {
+  if (type === 'embouteillage') return `Embouteillage ${severity ? SEVERITY[severity].label.toLowerCase() : ''} signalé`.replace('  ', ' ');
+  return ({
+    accident: 'Accident signalé',
+    route_barree: 'Route barrée signalée',
+    travaux: 'Travaux signalés',
+    inondation: 'Inondation signalée',
+    route_impraticable: 'Route impraticable signalée',
+  } as const)[type];
+};
+
+export const TRAFFIC_STATES: Record<'fluide' | 'modere' | 'dense' | 'bouchon', { label: string; color: string }> = {
+  fluide: { label: 'Fluide', color: '#3FBF5F' },
+  modere: { label: 'Modéré', color: '#FF974D' },
+  dense: { label: 'Dense', color: '#F23C32' },
+  bouchon: { label: 'Embouteillage', color: '#811F1F' },
 };
 
 export const SEVERITY: Record<Severity, { label: string; hint: string; color: string; tint: string }> = {
@@ -102,6 +122,8 @@ export const ERRORS: Record<string, string> = {
   geo_denied: 'Localisation refusée. Autorisez-la dans les réglages du téléphone.',
   geo_unavailable: 'Position introuvable. Activez le GPS et réessayez.',
   no_hospitals: 'Aucun hôpital enregistré pour le moment.',
+  too_many_points: 'Envoi trop volumineux, nouvel essai en cours.',
+  wake_lock: "Impossible de garder l'écran allumé : laissez-le allumé vous-même.",
 };
 
 export const errorText = (e: unknown) => {

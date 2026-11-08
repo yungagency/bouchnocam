@@ -119,6 +119,24 @@ select private.import_osm_hospitals();
 select vault.update_secret((select id from vault.secrets where name = 'ors_api_key'), 'NOUVELLE_CLE');
 ```
 
+## Mode conduite et trafic Bouchnocam (bêta)
+
+Première étape de l'architecture « sondes GPS » : les usagers volontaires partagent anonymement leur position pendant qu'ils roulent, et Bouchnocam calcule son propre trafic.
+
+- **Côté application** : bouton « Je roule » sur la carte. Il faut un compte et un accord explicite (affiché une seule fois). Un point est pris toutes les 4 secondes. Les points imprécis (plus de 60 m) ou aberrants (plus de 160 km/h) sont écartés. L'envoi se fait par lots de 30 secondes. L'écran reste allumé, et le mode s'arrête seul après 4 heures. Hors connexion, environ 15 minutes de points sont gardées.
+- **Côté Supabase** (migration `20261108000004`) :
+  - `ingest_probes` reçoit les points. Ils sont rattachés à une session tirée au hasard, jamais au compte.
+  - Le job pg_cron `bcm-trafic-calcul` regroupe les points des 10 dernières minutes, toutes les 5 minutes, dans des cases d'environ 160 m, en tenant compte du sens de circulation. Il exclut les motos ainsi que les 200 premiers et derniers mètres de chaque trajet, et prend la vitesse médiane des véhicules.
+  - Une case n'est affichée qu'à partir de 3 véhicules différents. Les seuils sont : 35 km/h et plus, fluide ; de 20 à 35, modéré ; de 8 à 20, dense ; en dessous de 8, bouchon.
+  - Le job `bcm-trafic-purge` efface les points bruts après 48 heures et les cases après 30 jours.
+- **Limite connue** : tant qu'il y a peu de conducteurs en Mode conduite, la carte Bouchnocam restera vide à la plupart des endroits. Le trafic Google (si la clé est configurée) reste la référence pendant le pilote.
+
+Nouveau type de signalement : **Route impraticable** (nids-de-poule, boue, chaussée défoncée), valable 12 heures. Le bouton Urgence évite ces routes comme les accidents, les routes barrées et les inondations.
+
+## Logo
+
+Les images de la marque sont dans `app/public/brand/` (`logo.png` pour le logo complet, `logo-mark.png` pour le pictogramme). Les icônes de l'application, dans `app/public/icons/`, en sont tirées. Pour changer de logo, remplacez ces fichiers en gardant les mêmes noms et les mêmes tailles.
+
 ## Pendant le pilote
 
 **Devenir modérateur** (après avoir créé son compte dans l'application) :

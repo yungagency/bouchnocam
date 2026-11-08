@@ -24,12 +24,13 @@ function Avatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'xl' }) {
 }
 
 function Ranking({ board, meId, me }: { board: Leader[] | null; meId: string | null; me: { display_name: string; points: number; rank: number } | null }) {
-  const top = (board ?? []).slice(0, 3);
+  const top = (board ?? []).slice(0, 10);
   const meInTop = top.some((p) => p.id === meId);
   return (
     <div className="pf-ranking">
-      <h3>Classements</h3>
+      <h3>Classements <small>Top 10</small></h3>
       {top.length === 0 && <p className="fine center">Personne n'a encore de points. Soyez le premier !</p>}
+      <div className="pf-ranking__list">
       {top.map((p, i) => (
         <div key={p.id} className={`pf-rank ${p.id === meId ? 'is-me' : ''}`}>
           <span className={`pf-rank__pos pf-rank__pos--${i + 1}`}>{i + 1}</span>
@@ -38,6 +39,7 @@ function Ranking({ board, meId, me }: { board: Leader[] | null; meId: string | n
           <b>{fmtPts(p.points)}</b>
         </div>
       ))}
+      </div>
       {me && meId && !meInTop && me.points > 0 && (
         <div className="pf-rank is-me">
           <span className="pf-rank__pos">{me.rank}</span>
@@ -119,7 +121,7 @@ export function ProfileView() {
             <p className="pf-hero__label">Points cumulés</p>
           </>
         ) : signedIn ? (
-          <div className="pf-hero__loading"><LogoMark className="is-searching" /></div>
+          <div className="pf-hero__loading"><LogoMark /></div>
         ) : (
           <>
             <div className="pf-hero__ring"><span className="pf-avatar pf-avatar--xl pf-avatar--guest"><IconStar size={40} /></span></div>
@@ -214,7 +216,7 @@ export function InstallSheet() {
 export function OnboardingSheet() {
   return (
     <Sheet label="Bienvenue">
-      <div className="center"><LogoMark size={96} className="is-intro" /></div>
+      <div className="center"><LogoMark size={96} /></div>
       <h2 className="sheet__title center" style={{ margin: '6px 0 4px' }}>Bienvenue sur Bouchnocam</h2>
       <p className="muted center">La carte des routes de Yaoundé, tenue à jour par ceux qui y roulent.</p>
       <ul className="onb">
@@ -230,7 +232,7 @@ export function OnboardingSheet() {
         <button type="button" className="btn btn--primary btn--block btn--lg" onClick={() => { closeOverlay(); startGeo(true); }}><IconLocate size={22} />Activer ma position</button>
         <button type="button" className="btn btn--ghost btn--block" onClick={() => closeOverlay()}>Plus tard</button>
       </div>
-      <p className="fine center">Votre position sert à placer la carte et vos signalements. Nous ne suivons pas vos trajets.</p>
+      <p className="fine center">Votre position sert à placer la carte et vos signalements. Vos trajets ne sont partagés que si vous activez le Mode conduite, de façon anonyme.</p>
     </Sheet>
   );
 }

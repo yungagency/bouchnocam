@@ -113,8 +113,9 @@ export function PrivacySheet() {
           <li>La position GPS de chaque signalement. Le signalement est public, sans votre nom.</li>
           <li>Vos confirmations. Votre position sert à vérifier la distance puis n'est pas conservée.</li>
           <li>Bouton Urgence : votre position est envoyée pour calculer l'itinéraire, sans être enregistrée.</li>
+          <li>Mode conduite (si vous l'activez) : position, vitesse et direction, sans votre nom. L'identifiant change à chaque trajet, le début et la fin des trajets sont ignorés, et les positions sont effacées après 48 h. Seules des vitesses moyennes par zone sont publiées.</li>
         </ul>
-        <p>Nous ne suivons pas vos trajets. Les données sont hébergées chez Supabase (Europe).</p>
+        <p>Sans Mode conduite, nous ne suivons pas vos trajets. Les données sont hébergées chez Supabase (Europe).</p>
       </div>
       <div className="card card--flat">
         <h3>Les règles</h3>

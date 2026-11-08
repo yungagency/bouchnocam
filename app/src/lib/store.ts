@@ -2,9 +2,9 @@
 import { useSyncExternalStore } from 'react';
 import * as api from './api';
 import { CONFIG } from './config';
-import { distanceM, errorText, inCameroon, isFresh } from './format';
+import { distanceM, errorText, inCameroon, isFresh, reportedPhrase } from './format';
 import type {
-  EmergencyResult, Hospital, Leader, Me, MyReport, Overlay, Pos, Report, ReportType, Severity, Tab,
+  EmergencyResult, Hospital, Leader, Me, MyReport, Overlay, Pos, Report, ReportType, Severity, Tab, TrafficCell,
 } from './types';
 
 export interface AppState {
@@ -27,6 +27,8 @@ export interface AppState {
   installAvailable: boolean;
   mapProvider: 'google' | 'leaflet';
   traffic: boolean;
+  trafficCells: TrafficCell[];
+  drive: { active: boolean; sent: number; startedAt: number; wakeLock: boolean };
 }
 
 let state: AppState = {
@@ -48,6 +50,8 @@ let state: AppState = {
   emergency: { status: 'idle', data: null, selected: 0 },
   installAvailable: false,
   mapProvider: 'leaflet',
+  trafficCells: [],
+  drive: { active: false, sent: 0, startedAt: 0, wakeLock: false },
   traffic: (() => { try { return localStorage.getItem('bcm.traffic') !== '0'; } catch { return true; } })(),
 };
 const listeners = new Set<() => void>();
@@ -124,6 +128,8 @@ export function loadReports({ silent = true } = {}) {
       const rows = await api.fetchReports(b);
       const now = Date.now();
       setState({ reports: rows.filter((r) => new Date(r.expires_at).getTime() > now), loadedOnce: true, offline: false });
+      // Trafic calculé par Bouchnocam (Mode conduite), si assez de véhicules
+      api.fetchTraffic(b).then((cells) => setState({ trafficCells: cells || [] })).catch(() => { /* sans importance */ });
     } catch (e) {
       if ((e as api.ApiError).code === 'network') setState({ offline: true });
       else if (!silent) toast(errorText(e));
@@ -157,14 +163,11 @@ export async function sendReport(type: ReportType, severity: Severity | null, pl
   }
   vibrate(70);
   if (state.overlay?.kind === 'report') closeOverlay();
-  const label = type === 'embouteillage' && severity
-    ? `Embouteillage ${['', 'léger', 'moyen', 'bloqué'][severity]}` : ({
-      accident: 'Accident', route_barree: 'Route barrée', travaux: 'Travaux', inondation: 'Inondation', embouteillage: 'Embouteillage',
-    } as const)[type];
+  const label = reportedPhrase(type, severity);
   try {
     const res = await api.createReport({ type, severity, lat: pos.lat, lng: pos.lng, accuracy: pos.acc, place });
     if (res.merged) {
-      toast(`${label} déjà signalé ici : votre signalement compte comme une confirmation.`, 6000);
+      toast('Déjà signalé ici : votre signalement compte comme une confirmation.', 6000);
     } else {
       setState({ undo: { reportId: res.id, label, until: Date.now() + CONFIG.undoSeconds * 1000 } });
     }
@@ -244,7 +247,12 @@ let centeredOnce = false;
 let userMovedMap = false;
 export const markUserMovedMap = () => { userMovedMap = true; };
 
+const rawListeners = new Set<(p: GeolocationPosition) => void>();
+/** Abonnement aux positions GPS brutes (vitesse, direction) — utilisé par le Mode conduite. */
+export const onRawPosition = (fn: (p: GeolocationPosition) => void) => { rawListeners.add(fn); return () => { rawListeners.delete(fn); }; };
+
 function onPosition(p: GeolocationPosition) {
+  rawListeners.forEach((fn) => fn(p));
   const pos: Pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy, ts: Date.now() };
   setState({ pos, geo: 'granted' });
   if (wantCenter || (!userMovedMap && !centeredOnce)) {
