@@ -35,6 +35,28 @@ GitHub → **Settings** → **Pages** → *Source* : **Deploy from a branch** �
 
 L'application est alors en ligne sur **https://yungagency.github.io/bouchnocam/**.
 
+### 3. Trafic en temps réel : la clé Google Maps (recommandé)
+
+Sans clé, la carte est OpenStreetMap et n'affiche que les signalements. Avec une clé Google Maps, la carte affiche **le trafic en temps réel**, avec les routes colorées en vert, orange, rouge et bordeaux, et les signalements Bouchnocam par-dessus. Un bouton « Trafic » permet d'afficher ou de masquer cette couche.
+
+1. Sur **console.cloud.google.com**, créez un projet « Bouchnocam » et activez la **facturation** (une carte bancaire est demandée).
+2. **APIs et services** → **Bibliothèque** : activez **Maps JavaScript API**.
+3. **Identifiants** → **Créer des identifiants** → **Clé API**, puis restreignez-la :
+   - restriction d'application : **Sites web** → `https://yungagency.github.io/*` ;
+   - restriction d'API : **Maps JavaScript API** uniquement.
+4. **Facturation** → **Budgets et alertes** : créez une alerte, par exemple à 20 $ par mois.
+5. GitHub → **Settings** → **Secrets and variables** → **Actions** → **New repository secret** :
+   - nom : `GOOGLE_MAPS_KEY` ;
+   - valeur : la clé.
+
+   Relancez ensuite la compilation : **Actions** → **Application v2** → **Run workflow**.
+
+**Coût** : la carte web relève de la catégorie « Essentials » de Google, avec 10 000 chargements gratuits par mois depuis mars 2025. Au-delà, le prix au millier est affiché dans le simulateur de Google. Dans l'application Android ou iOS, la carte native Google (plugin `@capacitor/google-maps`, qui gère aussi le trafic) reste gratuite sans limite d'après Google.
+
+**Si la clé est refusée** (facturation coupée, mauvaise restriction), l'application repasse toute seule sur la carte OpenStreetMap.
+
+**Pourquoi Google et pas Yango/Yandex** : Yandex n'a pas d'offre d'API utilisable pour Bouchnocam. La version gratuite interdit les usages de suivi et de dispatch, et la version commerciale est facturée en roubles. Aucune source ne montre que leur trafic couvre Yaoundé. Google affiche déjà le trafic de Yaoundé, comme on le voyait dans la maquette FlutterFlow.
+
 ## Compilation automatique (GitHub Actions)
 
 À chaque modification du dossier `app/`, le workflow :

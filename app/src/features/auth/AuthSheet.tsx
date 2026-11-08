@@ -7,6 +7,7 @@ import {
 } from '../../lib/store';
 import type { Role } from '../../lib/types';
 import { Sheet } from '../../ui/Sheet';
+import { LogoMark } from '../../ui/Logo';
 
 function RolePicker({ value, onChange }: { value: Role; onChange: (r: Role) => void }) {
   return (
@@ -57,8 +58,11 @@ export function AuthSheet({ mode, reason }: { mode: 'login' | 'signup'; reason?:
 
   return (
     <Sheet label={signup ? 'Créer mon compte' : 'Se connecter'}>
-      <h2 className="sheet__title">{signup ? 'Créer mon compte' : 'Se connecter'}</h2>
-      {reason && <p className="muted">{reason}</p>}
+      <div className="auth-head">
+        <LogoMark size={72} />
+        <h2 className="sheet__title">{signup ? 'Créer mon compte' : 'Bon retour !'}</h2>
+        <p className="muted">{reason || (signup ? 'Gratuit, en 30 secondes, avec votre numéro.' : 'Connectez-vous avec votre numéro de téléphone.')}</p>
+      </div>
       <form onSubmit={submit} noValidate>
         {signup && (
           <label className="field"><span>Nom ou surnom (visible dans le classement)</span>

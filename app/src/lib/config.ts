@@ -14,6 +14,10 @@ export const CONFIG = {
     subdomains: 'abcd',
   },
 
+  // Carte Google avec trafic en temps réel. Sans clé : carte OpenStreetMap sans trafic.
+  // La clé vient du secret GitHub GOOGLE_MAPS_KEY (voir README), restreinte au domaine du site.
+  googleMapsKey: ((import.meta.env.VITE_GOOGLE_MAPS_KEY as string | undefined) || '').trim(),
+
   refreshMs: 20000,
   voteRadiusM: 3000,
   confirmationsNeeded: 2,

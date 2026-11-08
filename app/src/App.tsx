@@ -3,7 +3,7 @@ import { CONFIG } from './lib/config';
 import { SEVERITY, TYPES } from './lib/format';
 import {
   centerOnUser, getState, loadReports, map, markUserMovedMap, openOverlay, pruneExpired, refreshUser,
-  setState, setTab, startEmergency, startGeo, toast, undoReport, useApp,
+  setState, setTab, startEmergency, startGeo, toast, toggleTraffic, undoReport, useApp,
 } from './lib/store';
 import type { Tab } from './lib/types';
 import { MapView } from './features/map/MapView';
@@ -95,23 +95,52 @@ function FabStack() {
   );
 }
 
-// ------------------------------------------------------------------ Légende
+// ------------------------------------------------------------------ Légende + trafic
+const TRAFFIC_SCALE = [
+  { label: 'Fluide', color: '#3FBF5F' },
+  { label: 'Ralenti', color: '#FF974D' },
+  { label: 'Chargé', color: '#F23C32' },
+  { label: 'Bloqué', color: '#811F1F' },
+];
+
 function Legend() {
   const [open, setOpen] = useState(true);
+  const provider = useApp((s) => s.mapProvider);
+  const traffic = useApp((s) => s.traffic);
+  const live = provider === 'google' && traffic;
   if (!open) {
     return <button type="button" className="legend-toggle" onClick={() => setOpen(true)} aria-label="Afficher la légende"><IconLayers size={22} /></button>;
   }
   return (
     <div className="legend" onClick={() => setOpen(false)} role="button" tabIndex={0} aria-label="Légende (toucher pour masquer)">
-      {([3, 2, 1] as const).map((s) => (
-        <span key={s} className="legend__row"><i style={{ background: SEVERITY[s].color }} />{SEVERITY[s].label}</span>
-      ))}
+      {live ? (
+        <>
+          <span className="legend__title"><i className="legend__live" />Trafic en direct</span>
+          <span className="legend__scale">{TRAFFIC_SCALE.map((t) => <i key={t.label} style={{ background: t.color }} />)}</span>
+          <span className="legend__scale-labels"><span>Fluide</span><span>Bloqué</span></span>
+        </>
+      ) : (
+        ([3, 2, 1] as const).map((s) => (
+          <span key={s} className="legend__row"><i style={{ background: SEVERITY[s].color }} />{SEVERITY[s].label}</span>
+        ))
+      )}
       <span className="legend__icons">
         {(['accident', 'route_barree', 'travaux', 'inondation'] as const).map((t) => (
           <span key={t} className="legend__glyph" style={{ ['--c' as string]: TYPES[t].color }} title={TYPES[t].label}>{GLYPH[t]}</span>
         ))}
       </span>
     </div>
+  );
+}
+
+function TrafficToggle() {
+  const provider = useApp((s) => s.mapProvider);
+  const traffic = useApp((s) => s.traffic);
+  if (provider !== 'google') return null;
+  return (
+    <button type="button" className={`map-chip ${traffic ? 'is-on' : ''}`} onClick={toggleTraffic} aria-pressed={traffic}>
+      <span className="map-chip__dots"><i /><i /><i /></span>Trafic
+    </button>
   );
 }
 
@@ -209,6 +238,7 @@ export function App() {
               <button type="button" className="map-btn" aria-label="Me localiser" onClick={() => { startGeo(true); if (geoGranted) centerOnUser(); }}>
                 <IconLocate size={24} />
               </button>
+              <TrafficToggle />
               <Legend />
             </div>
           </>
@@ -216,7 +246,7 @@ export function App() {
         {!emergencyOpen && <ConnectionPill offline={offline} onRetry={() => { loadReports(); }} />}
         {tab === 'nearby' && <NearbyView />}
         {tab === 'profile' && <ProfileView />}
-        {tab !== 'profile' && !emergencyOpen && <FabStack />}
+        {tab === 'map' && !emergencyOpen && <FabStack />}
         <UndoBar />
       </main>
 

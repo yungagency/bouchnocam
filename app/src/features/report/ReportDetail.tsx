@@ -68,20 +68,24 @@ export function ReportDetail({ id }: { id: string }) {
     );
   }
 
+  const pct = Math.min(100, (n / CONFIG.confirmationsNeeded) * 100);
   return (
     <Sheet label={reportLabel(r)}>
-      <div className="detail-head">
-        <span className="detail-icon" style={{ ['--c' as string]: reportColor(r) }}>{GLYPH[r.type]}</span>
+      <div className="dt-band" style={{ ['--c' as string]: reportColor(r) }}>
+        <span className="dt-band__icon">{GLYPH[r.type]}</span>
         <div>
-          <h2 className="sheet__title">{reportLabel(r)}</h2>
-          <p className="muted">Signalé {ago(r.created_at)}{dist !== null ? ` · à ${fmtDist(dist)}` : ''}</p>
+          <h2>{reportLabel(r)}</h2>
+          <p>Signalé {ago(r.created_at)}{dist !== null ? ` · à ${fmtDist(dist)}` : ''}</p>
         </div>
       </div>
-      <div className={`reliability ${ok ? 'is-ok' : ''}`}>
-        {ok ? <><IconCheck size={18} />Confirmé par {n} usager{n > 1 ? 's' : ''}</> : <>En attente de confirmation ({n}/{CONFIG.confirmationsNeeded})</>}
-        {r.contestations > 0 && <span className="muted"> · {r.contestations} « Plus là »</span>}
+      <div className={`dt-trust ${ok ? 'is-ok' : ''}`}>
+        <div className="dt-trust__head">
+          <strong>{ok ? <><IconCheck size={18} />Confirmé par {n} usager{n > 1 ? 's' : ''}</> : 'En attente de confirmation'}</strong>
+          <span>{Math.min(n, CONFIG.confirmationsNeeded)}/{CONFIG.confirmationsNeeded}</span>
+        </div>
+        <span className="dt-trust__bar"><i style={{ width: `${pct}%` }} /></span>
+        <small>{r.contestations > 0 ? `${r.contestations} « Plus là » · ` : ''}Disparaît {until(r.expires_at)} sans nouvelle confirmation</small>
       </div>
-      <p className="fine">Disparaît {until(r.expires_at)} sans nouvelle confirmation.</p>
       {actions}
       {isAdmin && <button type="button" className="btn btn--danger btn--block" style={{ marginTop: 14 }} disabled={busy} onClick={moderate}>Retirer (modération)</button>}
     </Sheet>

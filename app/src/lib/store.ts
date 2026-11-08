@@ -25,6 +25,8 @@ export interface AppState {
   undo: { reportId: string; label: string; until: number } | null;
   emergency: { status: 'idle' | 'locating' | 'loading' | 'ready' | 'error'; data: EmergencyResult | null; selected: number; error?: string };
   installAvailable: boolean;
+  mapProvider: 'google' | 'leaflet';
+  traffic: boolean;
 }
 
 let state: AppState = {
@@ -45,6 +47,8 @@ let state: AppState = {
   undo: null,
   emergency: { status: 'idle', data: null, selected: 0 },
   installAvailable: false,
+  mapProvider: 'leaflet',
+  traffic: (() => { try { return localStorage.getItem('bcm.traffic') !== '0'; } catch { return true; } })(),
 };
 const listeners = new Set<() => void>();
 
@@ -67,6 +71,12 @@ export interface MapApi {
 let mapApi: MapApi | null = null;
 export const registerMap = (m: MapApi | null) => { mapApi = m; };
 export const map = () => mapApi;
+
+export function toggleTraffic() {
+  const traffic = !state.traffic;
+  try { localStorage.setItem('bcm.traffic', traffic ? '1' : '0'); } catch { /* ignoré */ }
+  setState({ traffic });
+}
 
 // ---------------------------------------------------------------- Messages
 let toastId = 0;
