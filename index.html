@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bouchnocam</title>
+  <meta name="description" content="Bouchnocam : signalez et consultez en temps réel les embouteillages, accidents et routes barrées à Yaoundé.">
+  <meta name="theme-color" content="#14773A">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Bouchnocam">
+  <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/icons/icon.svg" alt="" width="34" height="34">
+        <div class="brand__text">
+          <strong>Bouchnocam</strong>
+          <span>Bouge, Signale, Gagne !</span>
+        </div>
+      </div>
+      <button id="points-chip" class="chip chip--points" type="button" hidden></button>
+      <button id="login-chip" class="chip" type="button">Se connecter</button>
+    </header>
+
+    <div id="offline-banner" class="banner" role="status" hidden>
+      Hors connexion. Les signalements affichés peuvent dater.
+    </div>
+
+    <main class="stage">
+      <section id="view-map" class="view view--map" aria-label="Carte">
+        <div id="map" aria-label="Carte des signalements"></div>
+        <button id="btn-locate" class="map-btn" type="button" aria-label="Me localiser"></button>
+        <div id="map-hint" class="map-hint" hidden></div>
+      </section>
+      <section id="view-nearby" class="view view--panel" aria-label="Autour de moi" hidden></section>
+      <section id="view-profile" class="view view--panel" aria-label="Profil" hidden></section>
+    </main>
+
+    <button id="btn-report" class="fab-report" type="button" aria-label="Signaler un problème"></button>
+
+    <nav class="tabbar" aria-label="Navigation">
+      <button type="button" data-tab="map" class="is-active"></button>
+      <button type="button" data-tab="nearby"></button>
+      <button type="button" data-tab="profile"></button>
+    </nav>
+  </div>
+
+  <div id="sheet-root" class="sheet-root" hidden>
+    <div class="sheet-backdrop" data-close></div>
+    <div class="sheet" role="dialog" aria-modal="true">
+      <button class="sheet__close" type="button" data-close aria-label="Fermer"></button>
+      <div class="sheet__body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <noscript>Bouchnocam a besoin de JavaScript pour fonctionner.</noscript>
+  <script src="assets/vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
