@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="left"><rect x="0" y="0" width="244" height="512"/></clipPath>
+    <clipPath id="right"><rect x="244" y="0" width="268" height="512"/></clipPath>
+    <g id="car">
+      <path d="M150 196 Q160 176 182 176 H298 Q320 176 330 196 L372 268 H108 Z"/>
+      <rect x="72" y="256" width="336" height="124" rx="42"/>
+      <rect x="92" y="352" width="72" height="72" rx="20"/>
+      <rect x="316" y="352" width="72" height="72" rx="20"/>
+    </g>
+  </defs>
+  <rect width="512" height="512" fill="#ffffff"/><g transform="translate(64 64) scale(.75)">
+  <g clip-path="url(#left)" fill="#1E7B3C"><use href="#car"/></g>
+  <g clip-path="url(#right)" fill="#F2C200"><use href="#car"/></g>
+  <path d="M176 204 H304 L334 256 H146 Z" fill="#ffffff" opacity=".92"/>
+  <circle cx="130" cy="314" r="24" fill="#ffffff"/>
+  <circle cx="350" cy="314" r="24" fill="#ffffff"/>
+  <g fill="none" stroke="#C8102E" stroke-width="22" stroke-linecap="round">
+    <path d="M372 112 A52 52 0 0 1 424 164"/>
+    <path d="M372 72 A92 92 0 0 1 464 164"/>
+  </g>
+</g></svg>

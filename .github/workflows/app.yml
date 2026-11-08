@@ -1,0 +1,70 @@
+name: Application v2 (compilation, tests, publication)
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', '.github/workflows/app.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Installer les paquets
+        run: npm install --no-audit --no-fund 2>&1 | tee ../install.txt
+
+      - name: Vérifier les types (TypeScript)
+        continue-on-error: true
+        run: npx tsc --noEmit 2>&1 | tee ../typecheck.txt; exit ${PIPESTATUS[0]}
+
+      - name: Compiler
+        run: npm run build 2>&1 | tee ../build.txt; exit ${PIPESTATUS[0]}
+
+      - name: Tester le parcours complet (captures d'écran)
+        continue-on-error: true
+        run: |
+          npx playwright install --with-deps chromium > /dev/null
+          mkdir -p /tmp/serve && ln -s "$PWD/dist" /tmp/serve/bouchnocam
+          (cd /tmp/serve && python3 -m http.server 8766 --bind 127.0.0.1 > /dev/null 2>&1 &)
+          sleep 1
+          node tests/e2e.cjs ../e2e-shots 2>&1 | tee ../e2e.txt; exit ${PIPESTATUS[0]}
+
+      - name: Publier l'application (branche gh-pages)
+        run: |
+          cd dist
+          touch .nojekyll
+          git init -q -b gh-pages
+          git add -A
+          git -c user.name="github-actions" -c user.email="actions@github.com" commit -qm "Déploiement ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
+
+      - name: Déposer les résultats (branche ci-results)
+        if: always()
+        working-directory: .
+        run: |
+          mkdir -p /tmp/ci && cd /tmp/ci
+          cp "$GITHUB_WORKSPACE"/*.txt . 2>/dev/null || true
+          cp -r "$GITHUB_WORKSPACE/e2e-shots" . 2>/dev/null || true
+          echo "commit: ${GITHUB_SHA}" > status.txt
+          echo "date: $(date -u +%FT%TZ)" >> status.txt
+          echo "dist: $(ls "$GITHUB_WORKSPACE/app/dist/assets" 2>/dev/null | tr '\n' ' ')" >> status.txt
+          git init -q -b ci-results
+          git add -A
+          git -c user.name="github-actions" -c user.email="actions@github.com" commit -qm "Résultats ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" ci-results

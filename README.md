@@ -1,21 +1,25 @@
-# Bouchnocam — application web (pilote)
+# Bouchnocam
 
-Carte collaborative des incidents de circulation à Yaoundé : les usagers **signalent** (embouteillage, accident, route barrée, travaux, inondation), les autres **confirment** (« Toujours là ») ou **contestent** (« Plus là »), et les points ne sont gagnés qu'après confirmation.
+Carte collaborative des incidents de circulation à Yaoundé.
 
-Application web installable (PWA) : elle s'ajoute à l'écran d'accueil Android ou iPhone, sans passer par un store.
+- **Signaler** en une touche : embouteillage léger, moyen ou bloqué, accident, route barrée, travaux, inondation. On peut annuler pendant 5 secondes.
+- **Confirmer** (« Toujours là ») ou **contester** (« Plus là ») les signalements des autres. Les points ne sont gagnés qu'après confirmation.
+- **Urgence** : l'hôpital le plus rapide, avec un itinéraire qui contourne les incidents signalés, la navigation Google Maps et les numéros de secours.
 
-## Technique
+Une seule base de code sert l'application web installable (pilote), et plus tard les applications Android et iOS, grâce à Capacitor.
 
-| Brique | Choix |
+## Organisation du dépôt
+
+| Dossier | Contenu |
 | --- | --- |
-| Interface | HTML, CSS et JavaScript sans framework ni étape de compilation |
-| Carte | Leaflet 1.9.4 (inclus dans `assets/vendor`), fonds de carte CARTO / OpenStreetMap |
-| Données et comptes | Supabase (PostgreSQL + PostGIS), projet `bouchnocam` |
-| Hors connexion | Service worker `sw.js` : l'application et les fonds de carte déjà vus restent disponibles |
+| `app/` | **Application v2** : React + TypeScript + Vite, emballée par Capacitor pour Android et iOS |
+| `supabase/migrations/` | Schéma de la base (tables, règles de sécurité, fonctions) |
+| `supabase/functions/emergency-route/` | Fonction Urgence : itinéraire vers l'hôpital (openrouteservice) |
+| `docs/REFONTE_V2.md` | Cahier des charges de la v2 |
+| `legacy/` | Ancienne v1 en HTML et JavaScript simples (archive) |
+| `.github/workflows/app.yml` | Compilation, tests et publication automatiques |
 
-Toutes les écritures passent par des fonctions de la base (`create_report`, `vote_report`) qui appliquent les règles : position au Cameroun, limite de 6 signalements par heure, fusion des doublons à moins de 200 m, confirmation à moins de 3 km, un seul vote par signalement, points attribués par la base. Le schéma complet est dans `supabase/migrations/`.
-
-## Mise en ligne : 3 réglages à faire une fois
+## Mise en ligne : deux réglages à faire une fois
 
 ### 1. Supabase : désactiver la confirmation par e-mail (obligatoire)
 
@@ -23,35 +27,93 @@ Les comptes utilisent le numéro de téléphone et un mot de passe. Supabase exi
 
 Supabase → projet **bouchnocam** → **Authentication** → **Sign In / Providers** → **Email** → désactiver **Confirm email** → **Save**.
 
-Sans ce réglage, l'inscription échoue.
+### 2. GitHub Pages : publier depuis la branche `gh-pages`
 
-### 2. GitHub Pages : publier l'application
+À chaque envoi sur `main`, GitHub Actions compile l'application et la dépose sur la branche `gh-pages`.
 
-GitHub → dépôt **bouchnocam** → **Settings** → **Pages** → *Source* : **Deploy from a branch** → branche **main**, dossier **/ (root)** → **Save**.
+GitHub → **Settings** → **Pages** → *Source* : **Deploy from a branch** → branche **gh-pages**, dossier **/ (root)** → **Save**.
 
-Après une à deux minutes, l'application est en ligne sur **https://yungagency.github.io/bouchnocam/** (HTTPS, nécessaire pour le GPS et l'installation).
+L'application est alors en ligne sur **https://yungagency.github.io/bouchnocam/**.
 
-### 3. Devenir modérateur
+## Compilation automatique (GitHub Actions)
 
-Créez votre compte dans l'application, puis dans Supabase → **SQL Editor** :
+À chaque modification du dossier `app/`, le workflow :
+
+1. installe les paquets ;
+2. vérifie les types TypeScript ;
+3. compile l'application ;
+4. rejoue le parcours complet sur un téléphone simulé (`app/tests/e2e.cjs`) ;
+5. publie l'application sur `gh-pages` ;
+6. dépose les journaux et les captures d'écran sur la branche `ci-results`.
+
+## Applications Android et iOS (Capacitor)
+
+**Android** (sur un ordinateur avec Android Studio) :
+
+```bash
+cd app
+npm install
+npm run build
+npx cap add android        # la première fois seulement
+npx cap sync android
+npx cap open android       # ouvre Android Studio : Build > Generate Signed Bundle / APK
+```
+
+La première fois, ajoutez dans `android/app/src/main/AndroidManifest.xml` :
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+```
+
+**iOS** (Mac avec Xcode) : `npx cap add ios`, puis ajoutez `NSLocationWhenInUseUsageDescription` dans `ios/App/App/Info.plist`. Le texte proposé : « Bouchnocam utilise votre position pour placer vos signalements et trouver l'hôpital le plus proche. »
+
+## Bouton Urgence : ce que l'équipe doit faire
+
+- **Vérifier les hôpitaux avant le pilote.** 92 établissements ont été importés d'OpenStreetMap. Certains ne sont pas des services d'urgence (par exemple des centres de recherche). Dans Supabase → **SQL Editor** :
+
+```sql
+-- Voir la liste
+select id, name, phone, emergency_24h, verified, source from public.hospitals where active order by name;
+
+-- Marquer un hôpital comme vérifié (il passe en priorité)
+update public.hospitals set verified = true, emergency_24h = true, phone = '222XXXXXX' where id = 12;
+
+-- Retirer un établissement qui n'accueille pas les urgences
+update public.hospitals set active = false where id = 49;
+
+-- Ajouter un hôpital
+insert into public.hospitals (name, lat, lng, phone, emergency_24h, verified, source)
+values ('Nom de l''hôpital', 3.8700, 11.5100, '222XXXXXX', true, true, 'equipe');
+
+-- Mettre à jour depuis OpenStreetMap (n'écrase jamais une fiche vérifiée)
+select private.import_osm_hospitals();
+```
+
+- **Numéros de secours** : 119 (assistance médicale), 118 (pompiers), 117 (police). Ils viennent de voyage.gc.ca et sont à confirmer sur le terrain. Ils se changent dans `app/src/lib/config.ts`.
+- **Clé openrouteservice** : elle est rangée dans Supabase Vault sous le nom `ors_api_key`, jamais dans le code. Pour la remplacer :
+
+```sql
+select vault.update_secret((select id from vault.secrets where name = 'ors_api_key'), 'NOUVELLE_CLE');
+```
+
+## Pendant le pilote
+
+**Devenir modérateur** (après avoir créé son compte dans l'application) :
 
 ```sql
 update public.profiles set is_admin = true
 where id = (select id from auth.users where email like '237681031218@%');
 ```
 
-(remplacez par votre numéro). Un modérateur voit un bouton « Retirer (modération) » sur chaque signalement.
-
-## Pendant le pilote
-
-**Suivre les indicateurs** (SQL Editor) :
+**Suivre les indicateurs** :
 
 ```sql
 select * from analytics.pilote_par_jour;            -- signalements, % confirmés, % retirés, signaleurs
 select * from analytics.usagers_actifs_par_semaine; -- usagers qui signalent ou confirment
 ```
 
-**Mot de passe oublié** (il n'y a pas de SMS au pilote) :
+**Mot de passe oublié** (pas de SMS au pilote) :
 
 ```sql
 update auth.users
@@ -59,9 +121,9 @@ set encrypted_password = extensions.crypt('NouveauMotDePasse', extensions.gen_sa
 where email like '2376XXXXXXXX@%';
 ```
 
-**Supprimer un compte à la demande d'un usager** : Supabase → Authentication → Users → supprimer l'utilisateur (ses signalements sont supprimés avec lui).
+**Supprimer un compte à la demande d'un usager** : Supabase → Authentication → Users.
 
-## Règles de fiabilité (réglables dans la migration)
+## Règles de fiabilité
 
 | Type | Durée de vie sans confirmation |
 | --- | --- |
@@ -71,21 +133,27 @@ where email like '2376XXXXXXXX@%';
 | Route barrée | 4 h |
 | Travaux | 3 jours |
 
-- Chaque « Toujours là » prolonge le signalement.
-- Deux « Plus là » consécutifs le retirent de la carte.
-- Points : +10 quand son signalement est confirmé par 2 usagers, +2 par confirmation ou fin d'incident utile, −5 si son signalement est contesté sans avoir été confirmé.
+- Le signalement est placé à la position GPS du téléphone.
+- Au maximum 6 signalements par heure et par compte.
+- Un signalement identique à moins de 200 m compte comme une confirmation.
+- On confirme ou on conteste à moins de 3 km ; chaque « Toujours là » prolonge le signalement, et deux « Plus là » consécutifs le retirent.
+- Annulation possible dans la minute, tant que personne n'a répondu.
+- Points :
+  - +10 quand son signalement est confirmé par 2 usagers ;
+  - +2 par confirmation ou fin d'incident utile ;
+  - −5 si son signalement est contesté sans avoir été confirmé.
 
 ## Développer en local
 
 ```bash
-python3 -m http.server 8000
-# puis ouvrir http://localhost:8000
+cd app
+npm install
+npm run dev
 ```
-
-À chaque nouvelle version publiée, changer `VERSION` dans `sw.js` pour forcer la mise à jour du cache chez les usagers.
 
 ## Avant le lancement public
 
-- Fonds de carte : CARTO est gratuit pour un usage limité et non commercial. Avant le lancement public, prendre une clé MapTiler ou Stadia Maps et changer `tiles` dans `assets/js/config.js`.
-- Mot de passe oublié par SMS : brancher un fournisseur SMS sur Supabase.
-- Notifications par zone.
+- **Fonds de carte** : CARTO est gratuit pour un usage limité et non commercial. Avant le lancement public, prenez une clé MapTiler ou Stadia Maps et changez `tiles` dans `app/src/lib/config.ts`.
+- **Recherche et nom du quartier** : ils passent par Nominatim (OpenStreetMap), qui convient à un faible volume. Au-delà, il faudra un service payant ou auto-hébergé.
+- **Mot de passe oublié par SMS** : brancher un fournisseur SMS sur Supabase.
+- **Notifications par zone.**
