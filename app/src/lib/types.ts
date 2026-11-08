@@ -18,6 +18,7 @@ export interface Report {
 export interface MyReport extends Omit<Report, 'status'> {
   status: 'actif' | 'confirme' | 'retire' | 'expire';
   points: number;
+  place_label: string | null;
 }
 
 export interface Me {
@@ -29,6 +30,8 @@ export interface Me {
   rank: number;
   reports_count: number;
   confirmed_count: number;
+  useful_votes?: number;
+  morning_reports?: number;
 }
 
 export interface Leader {
@@ -77,6 +80,7 @@ export type Overlay =
   | { kind: 'auth'; mode: 'login' | 'signup'; reason?: string }
   | { kind: 'privacy' }
   | { kind: 'edit' }
+  | { kind: 'account' }
   | { kind: 'install' }
   | { kind: 'onboarding' };
 

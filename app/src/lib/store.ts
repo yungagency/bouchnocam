@@ -130,11 +130,11 @@ export function pruneExpired() {
   if (kept.length !== state.reports.length) setState({ reports: kept });
 }
 
-let pendingReport: { type: ReportType; severity: Severity | null } | null = null;
+let pendingReport: { type: ReportType; severity: Severity | null; place: string | null } | null = null;
 
-export async function sendReport(type: ReportType, severity: Severity | null) {
+export async function sendReport(type: ReportType, severity: Severity | null, place: string | null = null) {
   if (!api.isSignedIn()) {
-    pendingReport = { type, severity };
+    pendingReport = { type, severity, place };
     openOverlay({ kind: 'auth', mode: 'signup', reason: 'Créez votre compte (30 secondes) : votre signalement partira tout de suite après.' });
     return;
   }
@@ -152,7 +152,7 @@ export async function sendReport(type: ReportType, severity: Severity | null) {
       accident: 'Accident', route_barree: 'Route barrée', travaux: 'Travaux', inondation: 'Inondation', embouteillage: 'Embouteillage',
     } as const)[type];
   try {
-    const res = await api.createReport({ type, severity, lat: pos.lat, lng: pos.lng, accuracy: pos.acc });
+    const res = await api.createReport({ type, severity, lat: pos.lat, lng: pos.lng, accuracy: pos.acc, place });
     if (res.merged) {
       toast(`${label} déjà signalé ici : votre signalement compte comme une confirmation.`, 6000);
     } else {
@@ -185,7 +185,7 @@ export async function flushPendingReport() {
   if (!pendingReport || !api.isSignedIn()) return;
   const p = pendingReport;
   pendingReport = null;
-  await sendReport(p.type, p.severity);
+  await sendReport(p.type, p.severity, p.place);
 }
 
 export async function vote(r: Report, value: 1 | -1) {

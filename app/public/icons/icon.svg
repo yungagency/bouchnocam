@@ -1,22 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <clipPath id="left"><rect x="0" y="0" width="244" height="512"/></clipPath>
-    <clipPath id="right"><rect x="244" y="0" width="268" height="512"/></clipPath>
-    <g id="car">
-      <path d="M150 196 Q160 176 182 176 H298 Q320 176 330 196 L372 268 H108 Z"/>
-      <rect x="72" y="256" width="336" height="124" rx="42"/>
-      <rect x="92" y="352" width="72" height="72" rx="20"/>
-      <rect x="316" y="352" width="72" height="72" rx="20"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#fff"/><g transform="translate(256 256) scale(1.13) translate(-256 -256)"><defs>
+    <clipPath id="bcm-g"><path d="M-20 -20 H148 L166 60 L208 98 L170 230 H-20 Z"/></clipPath>
+    <clipPath id="bcm-y"><path d="M148 -20 H330 V230 H170 L208 98 L166 60 Z"/></clipPath>
+    <g id="bcm-car">
+      <rect x="-8" y="70" width="32" height="20" rx="8"/>
+      <rect x="276" y="70" width="32" height="20" rx="8"/>
+      <path d="M50 86 L80 22 Q88 6 106 6 H194 Q212 6 220 22 L250 86 Z"/>
+      <path d="M18 88 Q22 70 42 68 H258 Q278 70 282 88 L290 128 Q292 162 280 174 Q274 180 258 180 H42 Q26 180 20 174 Q8 162 10 128 Z"/>
+      <rect x="28" y="160" width="54" height="46" rx="13"/>
+      <rect x="218" y="160" width="54" height="46" rx="13"/>
     </g>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#ffffff"/>
-  <g clip-path="url(#left)" fill="#1E7B3C"><use href="#car"/></g>
-  <g clip-path="url(#right)" fill="#F2C200"><use href="#car"/></g>
-  <path d="M176 204 H304 L334 256 H146 Z" fill="#ffffff" opacity=".92"/>
-  <circle cx="130" cy="314" r="24" fill="#ffffff"/>
-  <circle cx="350" cy="314" r="24" fill="#ffffff"/>
-  <g fill="none" stroke="#C8102E" stroke-width="22" stroke-linecap="round">
-    <path d="M372 112 A52 52 0 0 1 424 164"/>
-    <path d="M372 72 A92 92 0 0 1 464 164"/>
+  <g transform="translate(101 211) scale(0.82 0.9)">
+    <g clip-path="url(#bcm-g)" fill="#1E8A45"><use href="#bcm-car"/></g>
+    <g clip-path="url(#bcm-y)" fill="#F4C20D"><use href="#bcm-car"/></g>
+    <path d="M104 30 Q107 24 114 24 H186 Q193 24 196 30 L218 72 H82 Z" fill="#fff"/>
+    <path d="M28 114 Q38 101 74 105 Q85 111 79 121 Q52 127 33 123 Q24 120 28 114 Z" fill="#fff"/>
+    <path d="M272 114 Q262 101 226 105 Q215 111 221 121 Q248 127 267 123 Q276 120 272 114 Z" fill="#fff"/>
   </g>
-</svg>
+  <g fill="none" stroke="#D0213A" stroke-width="18" stroke-linecap="round">
+    <path d="M280 200 A48 48 0 0 1 328 248"/>
+    <path d="M280 159 A89 89 0 0 1 369 248"/>
+    <path d="M280 118 A130 130 0 0 1 410 248"/>
+  </g></g></svg>

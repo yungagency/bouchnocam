@@ -11,7 +11,8 @@ import { ReportScreen } from './features/report/ReportScreen';
 import { ReportDetail } from './features/report/ReportDetail';
 import { EmergencyScreen } from './features/emergency/EmergencyScreen';
 import { NearbyView } from './features/nearby/NearbyView';
-import { InstallSheet, OnboardingSheet, ProfileView } from './features/profile/ProfileView';
+import { AccountSheet, InstallSheet, OnboardingSheet, ProfileView } from './features/profile/ProfileView';
+import { ConnectionPill, LogoMark, Splash } from './ui/Logo';
 import { AuthSheet, EditProfileSheet, PrivacySheet } from './features/auth/AuthSheet';
 import {
   GLYPH, IconAmbulance, IconClose, IconLayers, IconLocate, IconMap, IconMegaphone, IconNearby, IconProfile, IconSearch, IconStar,
@@ -48,9 +49,9 @@ function TopBar() {
   return (
     <header className="topbar">
       <form className="search" onSubmit={search} role="search">
-        <img src="./icons/icon.svg" alt="" width={30} height={30} />
+        <LogoMark size={34} className="search__logo" />
         <input type="search" value={q} onChange={(e) => { setQ(e.target.value); if (!e.target.value) setResults(null); }}
-          placeholder="Rechercher un quartier, un lieu…" aria-label="Rechercher un lieu" enterKeyHint="search" />
+          placeholder="Rechercher un lieu…" aria-label="Rechercher un lieu" enterKeyHint="search" />
         {q ? (
           <button type="button" className="search__btn" aria-label="Effacer" onClick={() => { setQ(''); setResults(null); }}><IconClose size={20} /></button>
         ) : (
@@ -123,7 +124,7 @@ function UndoBar() {
     const t = setInterval(() => {
       if (Date.now() >= undo.until) {
         setState({ undo: null });
-        toast('Merci ! +10 points dès que 2 usagers auront confirmé.', 4500);
+        // le bandeau disparaît simplement
       } else tick((x) => x + 1);
     }, 250);
     return () => clearInterval(t);
@@ -133,8 +134,9 @@ function UndoBar() {
   return (
     <div className="undo" role="status">
       <span className="undo__check">✓</span>
-      <span className="undo__text"><strong>{undo.label}</strong> signalé</span>
-      <button type="button" className="undo__btn" onClick={undoReport}>Annuler ({left})</button>
+      <span className="undo__text"><strong>Merci !</strong>{undo.label} signalé · +10 points dès 2 confirmations</span>
+      <button type="button" className="undo__btn" onClick={undoReport}>Annuler <small>{left}</small></button>
+      <span className="undo__timer" style={{ animationDuration: `${CONFIG.undoSeconds}s` }} />
     </div>
   );
 }
@@ -167,6 +169,7 @@ export function App() {
   const overlay = useApp((s) => s.overlay);
   const offline = useApp((s) => s.offline);
   const geoGranted = useApp((s) => s.geo === 'granted');
+  const loadedOnce = useApp((s) => s.loadedOnce);
 
   useEffect(() => {
     refreshUser();
@@ -195,7 +198,7 @@ export function App() {
 
   return (
     <div className={`app ${emergencyOpen ? 'is-emergency' : ''}`}>
-      {offline && <div className="banner" role="status">Hors connexion. Les signalements affichés peuvent dater.</div>}
+      <Splash ready={loadedOnce || offline} />
       <main className="stage">
         <MapView />
         {tab === 'map' && !emergencyOpen && (
@@ -210,6 +213,7 @@ export function App() {
             </div>
           </>
         )}
+        {!emergencyOpen && <ConnectionPill offline={offline} onRetry={() => { loadReports(); }} />}
         {tab === 'nearby' && <NearbyView />}
         {tab === 'profile' && <ProfileView />}
         {tab !== 'profile' && !emergencyOpen && <FabStack />}
@@ -232,6 +236,7 @@ export function App() {
       {overlay?.kind === 'auth' && <AuthSheet key={overlay.mode} mode={overlay.mode} reason={overlay.reason} />}
       {overlay?.kind === 'privacy' && <PrivacySheet />}
       {overlay?.kind === 'edit' && <EditProfileSheet />}
+      {overlay?.kind === 'account' && <AccountSheet />}
       {overlay?.kind === 'install' && <InstallSheet />}
       {overlay?.kind === 'onboarding' && <OnboardingSheet />}
       <Toast />

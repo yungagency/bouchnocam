@@ -158,10 +158,10 @@ export function fetchReports(b: { south: number; west: number; north: number; ea
   return http<Report[]>(`/rest/v1/reports?${q}`);
 }
 
-export const createReport = (p: { type: ReportType; severity: Severity | null; lat: number; lng: number; accuracy: number }) =>
+export const createReport = (p: { type: ReportType; severity: Severity | null; lat: number; lng: number; accuracy: number; place: string | null }) =>
   http<{ id: string; merged: boolean }>('/rest/v1/rpc/create_report', {
     method: 'POST',
-    body: { p_type: p.type, p_severity: p.severity, p_lat: p.lat, p_lng: p.lng, p_accuracy: Math.round(p.accuracy) },
+    body: { p_type: p.type, p_severity: p.severity, p_lat: p.lat, p_lng: p.lng, p_accuracy: Math.round(p.accuracy), p_place: p.place },
   });
 
 export const cancelReport = (id: string) =>

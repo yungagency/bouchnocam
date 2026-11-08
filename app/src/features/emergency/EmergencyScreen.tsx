@@ -2,6 +2,7 @@ import { CONFIG } from '../../lib/config';
 import { fmtDist, fmtDuration, mapsHref, telHref } from '../../lib/format';
 import { closeOverlay, showRoute, startEmergency, startGeo, useApp } from '../../lib/store';
 import type { RouteOption } from '../../lib/types';
+import { LogoMark } from '../../ui/Logo';
 import { IconAlert, IconAmbulance, IconCheck, IconClose, IconHospital, IconNavigate, IconPhone } from '../../ui/icons';
 
 function Badges({ o }: { o: RouteOption }) {
@@ -50,7 +51,7 @@ export function EmergencyScreen() {
         <div className="emergency__body">
           {(em.status === 'locating' || em.status === 'loading') && (
             <div className="em-loading">
-              <span className="spinner" aria-hidden="true" />
+              <LogoMark className="is-searching" size={56} />
               <strong>{em.status === 'locating' ? 'Recherche de votre position…' : "Calcul de l'itinéraire le plus rapide…"}</strong>
             </div>
           )}

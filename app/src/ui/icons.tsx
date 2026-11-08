@@ -77,24 +77,26 @@ export const GLYPH: Record<ReportType, ReactNode> = {
   inondation: <Glyph type="inondation" />,
 };
 
-// Illustration des cartes Léger / Moyen / Bloqué : 1, 2 ou 3 voitures, comme sur la maquette
-function Car({ x, y, s, color }: { x: number; y: number; s: number; color: string }) {
+// Illustration des cartes Léger / Moyen / Bloqué, comme sur la maquette : 1, 3 ou 4 voitures
+function Car({ x, y, s, body, dark }: { x: number; y: number; s: number; body: string; dark: string }) {
   return (
     <g transform={`translate(${x} ${y}) scale(${s})`}>
-      <path d="M2 17 5 9a3 3 0 0 1 2.8-2h12.4A3 3 0 0 1 23 9l3 8v7a1.5 1.5 0 0 1-1.5 1.5h-2A1.5 1.5 0 0 1 21 24v-1.5H7V24a1.5 1.5 0 0 1-1.5 1.5h-2A1.5 1.5 0 0 1 2 24z" fill={color} stroke="#fff" strokeWidth="1.6" />
-      <path d="M6 15.5 7.8 10h12.4l1.8 5.5z" fill="#fff" opacity=".85" />
-      <circle cx="6.8" cy="19.2" r="1.7" fill="#fff" />
-      <circle cx="21.2" cy="19.2" r="1.7" fill="#fff" />
+      <path d="M3 17.5 6.2 9.4A3.2 3.2 0 0 1 9.2 7.3h11.6a3.2 3.2 0 0 1 3 2.1L27 17.5v7.3a1.6 1.6 0 0 1-1.6 1.6h-2.6a1.6 1.6 0 0 1-1.6-1.6v-1.3H8.8v1.3a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 24.8z" fill={body} stroke={dark} strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M7.4 15.8 9.3 10.6h11.4l1.9 5.2z" fill="#E8F4FF" stroke={dark} strokeWidth="1" strokeLinejoin="round" />
+      <circle cx="7.8" cy="20.2" r="1.9" fill="#FFF7D6" stroke={dark} strokeWidth=".8" />
+      <circle cx="22.2" cy="20.2" r="1.9" fill="#FFF7D6" stroke={dark} strokeWidth=".8" />
+      <path d="M12 21h6" stroke={dark} strokeWidth="1.2" strokeLinecap="round" />
     </g>
   );
 }
 
-export function TrafficArt({ severity, color }: { severity: Severity; color: string }) {
+export function TrafficArt({ severity }: { severity: Severity }) {
+  const c = { 1: ['#F4C20D', '#8A6A00'], 2: ['#F28C28', '#9A4A00'], 3: ['#E53945', '#8E1420'] }[severity];
   return (
-    <svg viewBox="0 0 84 64" className="traffic-art" aria-hidden="true">
-      {severity === 1 && <Car x={20} y={14} s={1.6} color={color} />}
-      {severity === 2 && (<><Car x={6} y={18} s={1.35} color={color} /><Car x={40} y={10} s={1.35} color={color} /></>)}
-      {severity === 3 && (<><Car x={22} y={2} s={1.15} color={color} /><Car x={2} y={26} s={1.15} color={color} /><Car x={44} y={26} s={1.15} color={color} /></>)}
+    <svg viewBox="0 0 90 70" className="traffic-art" aria-hidden="true">
+      {severity === 1 && (<><path d="M41 12h8l2 4h-12z" fill="#2B2B2B" /><Car x={18} y={10} s={1.8} body={c[0]} dark={c[1]} /></>)}
+      {severity === 2 && (<><Car x={26} y={2} s={1.25} body={c[0]} dark={c[1]} /><Car x={6} y={26} s={1.25} body={c[0]} dark={c[1]} /><Car x={46} y={26} s={1.25} body={c[0]} dark={c[1]} /></>)}
+      {severity === 3 && (<><Car x={26} y={0} s={1.15} body={c[0]} dark={c[1]} /><Car x={8} y={20} s={1.15} body={c[0]} dark={c[1]} /><Car x={44} y={20} s={1.15} body={c[0]} dark={c[1]} /><Car x={26} y={38} s={1.15} body={c[0]} dark={c[1]} /></>)}
     </svg>
   );
 }
