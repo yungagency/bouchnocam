@@ -1,6 +1,6 @@
 // Service worker Bouchnocam v2 : l'application s'ouvre hors connexion,
 // les fonds de carte déjà vus restent disponibles, les données restent toujours fraîches.
-const VERSION = 'bcm-v2.1.0';
+const VERSION = 'bcm-v2.2.0';
 const APP = `${VERSION}-app`;
 const TILES = `${VERSION}-tiles`;
 const MAX_TILES = 600;
