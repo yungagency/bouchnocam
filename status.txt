@@ -1,0 +1,3 @@
+commit: c0d143aaeb5a010c3e826c9362fae8af6b67ceab
+date: 2026-11-13T17:28:32Z
+dist: index-8-fcP20-.css index-ik2-_gC2.js poppins-Bold-m13u08hj.woff poppins-Medium-CuCpB1Hn.woff poppins-Regular-BPOxZMxR.woff 

@@ -1,0 +1,55 @@
+Mode conduite : positions envoyées = 4
+Classement : lignes = 10 · défile = true · ligne « moi » = true
+Retour Android ferme l'écran Signaler : true
+ERREURS/AVERTISSEMENTS: [
+ "warning: As of February 21st, 2024, google.maps.Marker is deprecated. Please use google.maps.marker.AdvancedMarkerElement instead. At this time, google.maps.Marker is not scheduled to be discontinued, but google.maps.marker.AdvancedMarkerElement is recommended over google.maps.Marker. While google.maps.Marker will continue to receive bug fixes for any major regressions, existing bugs in google.maps.Marker will not be addressed. At least 12 months notice will be given before support is discontinued. Please see https://developers.google.com/maps/deprecations for additional details and https://developers.google.com/maps/documentation/javascript/advanced-markers/migration for the migration guide.",
+ "error: Google Maps JavaScript API error: RefererNotAllowedMapError\nhttps://developers.google.com/maps/documentation/javascript/error-messages#referer-not-allowed-map-error\nYour site URL to be authorized: http://127.0.0.1:8766/bouchnocam/",
+ "warning: Google Maps indisponible : passage sur la carte OpenStreetMap"
+]
+APPELS:
+POST /rest/v1/rpc/traffic_now {"p_south":3.7211040942991227,"p_west":11.438964843750004,"p_north":4.012366822791628,"p_east":11.594558715820
+POST /rest/v1/rpc/traffic_now {"p_south":3.8303086232463275,"p_west":11.497269630432132,"p_north":3.903124322325784,"p_east":11.536168098449
+POST /functions/v1/phone-signup {"phone":"681031218","password":"secret12","display_name":"Junior P.","role":"taximan"}
+POST /auth/v1/token {"email":"237681031218@telephone.bouchnocam.example","password":"secret12"}
+POST /rest/v1/rpc/me {}
+GET /rest/v1/votes 
+POST /rest/v1/rpc/my_reports {"p_limit":30}
+POST /rest/v1/rpc/create_report {"p_type":"embouteillage","p_severity":3,"p_lat":3.8667,"p_lng":11.5167,"p_accuracy":18,"p_place":"Melen, Yaou
+POST /rest/v1/rpc/traffic_now {"p_south":3.8303086232463275,"p_west":11.497269630432132,"p_north":3.903124322325784,"p_east":11.536168098449
+POST /rest/v1/rpc/me {}
+GET /rest/v1/votes 
+POST /rest/v1/rpc/my_reports {"p_limit":30}
+POST /rest/v1/rpc/traffic_now {"p_south":3.848501964336942,"p_west":11.506972789764406,"p_north":3.884909814714334,"p_east":11.5264220237731
+POST /rest/v1/rpc/cancel_report {"p_report_id":"new1"}
+POST /rest/v1/rpc/me {}
+GET /rest/v1/votes 
+POST /rest/v1/rpc/my_reports {"p_limit":30}
+POST /rest/v1/rpc/create_report {"p_type":"accident","p_severity":null,"p_lat":3.8667,"p_lng":11.5167,"p_accuracy":18,"p_place":"Melen, Yaound
+POST /rest/v1/rpc/traffic_now {"p_south":3.848501964336942,"p_west":11.506972789764406,"p_north":3.884909814714334,"p_east":11.5264220237731
+POST /rest/v1/rpc/me {}
+GET /rest/v1/votes 
+POST /rest/v1/rpc/my_reports {"p_limit":30}
+POST /rest/v1/rpc/traffic_now {"p_south":3.848501964336942,"p_west":11.506972789764406,"p_north":3.884909814714334,"p_east":11.5264220237731
+POST /rest/v1/rpc/vote_report {"p_report_id":"r7","p_vote":1,"p_lat":3.8667,"p_lng":11.5167}
+POST /rest/v1/rpc/me {}
+GET /rest/v1/votes 
+POST /rest/v1/rpc/my_reports {"p_limit":30}
+POST /rest/v1/rpc/traffic_now {"p_south":3.848501964336942,"p_west":11.506972789764406,"p_north":3.884909814714334,"p_east":11.5264220237731
+POST /functions/v1/emergency-route {"lat":3.8667,"lng":11.5167}
+POST /rest/v1/rpc/traffic_now {"p_south":3.823902913914814,"p_west":11.49705505371094,"p_north":3.9029360431290185,"p_east":11.5359535217285
+POST /rest/v1/rpc/traffic_now {"p_south":3.6894833195056926,"p_west":11.450122833251957,"p_north":4.005621658060354,"p_east":11.605716705322
+POST /rest/v1/rpc/traffic_now {"p_south":3.701918295137724,"p_west":11.450122833251957,"p_north":3.99318759828361,"p_east":11.60571670532226
+POST /rest/v1/rpc/traffic_now {"p_south":3.854796271183414,"p_west":11.50227355957031,"p_north":3.8912038510140685,"p_east":11.5217227935791
+POST /rest/v1/rpc/traffic_now {"p_south":3.854796271183414,"p_west":11.50227355957031,"p_north":3.8912038510140685,"p_east":11.5217227935791
+POST /rest/v1/rpc/traffic_now {"p_south":3.848501964336942,"p_west":11.507380485534666,"p_north":3.884909814714334,"p_east":11.5268297195434
+POST /rest/v1/rpc/traffic_now {"p_south":3.848501964336942,"p_west":11.507380485534666,"p_north":3.884909814714334,"p_east":11.5268297195434
+POST /rest/v1/rpc/ingest_probes {"p_session":"1151fd00-6f8f-48ca-9e77-bca5816f09fe","p_role":"taximan","p_points":[{"t":1794590881293,"lat":3.
+POST /rest/v1/rpc/me {}
+GET /rest/v1/votes 
+POST /rest/v1/rpc/my_reports {"p_limit":30}
+GET /rest/v1/profiles 
+POST /rest/v1/rpc/traffic_now {"p_south":3.848501964336942,"p_west":11.507380485534666,"p_north":3.884909814714334,"p_east":11.5268297195434
+POST /rest/v1/rpc/me {}
+GET /rest/v1/votes 
+POST /rest/v1/rpc/my_reports {"p_limit":30}
+GET /rest/v1/profiles 
